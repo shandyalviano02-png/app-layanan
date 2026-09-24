@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class District extends Model
+{
+    use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'code',
+        'name',
+    ];
+
+    /**
+     * Villages within this district.
+     */
+    public function villages(): HasMany
+    {
+        return $this->hasMany(Village::class);
+    }
+
+    /**
+     * Users assigned as operators for this district.
+     */
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+}

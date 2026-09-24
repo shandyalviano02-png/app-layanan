@@ -1,0 +1,148 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\ServiceRequestStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class ServiceRequest extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'request_number',
+        'service_type_id',
+        'submitter_id',
+        'applicant_name',
+        'applicant_nik',
+        'family_card_number',
+        'address',
+        'village_id',
+        'phone',
+        'submitted_at',
+        'officer_id',
+        'work_unit_id',
+        'status',
+        'is_priority',
+        'verification_result',
+        'officer_notes',
+        'assessment_notes',
+        'service_result',
+        'rejection_reason',
+        'completed_at',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => ServiceRequestStatus::class,
+            'is_priority' => 'boolean',
+            'submitted_at' => 'datetime',
+            'completed_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * The service type for this request.
+     */
+    public function serviceType(): BelongsTo
+    {
+        return $this->belongsTo(ServiceType::class);
+    }
+
+    /**
+     * The citizen or operator user who submitted this request.
+     */
+    public function submitter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'submitter_id');
+    }
+
+    /**
+     * The officer assigned to handle this request.
+     */
+    public function officer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'officer_id');
+    }
+
+    /**
+     * The work unit responsible for this request.
+     */
+    public function workUnit(): BelongsTo
+    {
+        return $this->belongsTo(WorkUnit::class);
+    }
+
+    /**
+     * Domicile village of the applicant.
+     */
+    public function village(): BelongsTo
+    {
+        return $this->belongsTo(Village::class);
+    }
+
+    /**
+     * Uploaded requirement documents for this request.
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(ServiceRequestDocument::class);
+    }
+
+    /**
+     * DTSEN certificate details (Layanan 1).
+     */
+    public function dtsenCertificate(): HasOne
+    {
+        return $this->hasOne(DtsenCertificate::class);
+    }
+
+    /**
+     * PBI reactivation details (Layanan 2).
+     */
+    public function pbiReactivation(): HasOne
+    {
+        return $this->hasOne(PbiReactivation::class);
+    }
+
+    /**
+     * Related rehabilitation case (Layanan 3) if originated from this request.
+     */
+    public function rehabilitationCase(): HasOne
+    {
+        return $this->hasOne(RehabilitationCase::class);
+    }
+
+    /**
+     * Polymorphic status change logs.
+     */
+    public function statusHistories(): MorphMany
+    {
+        return $this->morphMany(StatusHistory::class, 'statusable');
+    }
+
+    /**
+     * Polymorphic dispositions for this service request.
+     */
+    public function dispositions(): MorphMany
+    {
+        return $this->morphMany(Disposition::class, 'dispositionable');
+    }
+}
