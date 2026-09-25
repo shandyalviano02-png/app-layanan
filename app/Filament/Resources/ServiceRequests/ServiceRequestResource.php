@@ -28,13 +28,15 @@ class ServiceRequestResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Layanan 1 — SK DTSEN';
 
-    protected static ?string $navigationLabel = 'Permohonan Layanan';
+    protected static ?string $navigationLabel = 'Permohonan SK DTSEN';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentCheck;
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()
+            ->whereHas('serviceType', fn ($q) => $q->where('handler', 'dtsen'));
+
         $user = auth()->user();
 
         if (! $user) {
