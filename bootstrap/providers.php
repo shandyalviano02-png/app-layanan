@@ -6,4 +6,5 @@ use App\Providers\Filament\AdminPanelProvider;
 return [
     AppServiceProvider::class,
     AdminPanelProvider::class,
+    Spatie\Permission\PermissionServiceProvider::class,
 ];
